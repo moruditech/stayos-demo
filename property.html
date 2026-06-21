@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#0D0C0B">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Property Dashboard — StayOS</title>
+<link rel="stylesheet" href="./css/base.css">
+<link rel="stylesheet" href="./css/dashboard.css">
+<style>
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: var(--sp-4); }
+.three-col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: var(--sp-4); }
+
+/* Room board controls */
+.board-controls {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  flex-wrap: wrap;
+}
+
+.filter-chip {
+  padding: 4px 10px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border-radius: 20px;
+  border: 1.5px solid var(--light-border);
+  color: var(--light-text-2);
+  background: var(--light-surface);
+  cursor: pointer;
+  transition: var(--tr-fast);
+  white-space: nowrap;
+}
+.filter-chip:hover, .filter-chip.active {
+  border-color: var(--light-text);
+  color: var(--light-text);
+  background: var(--light-text);
+  color: var(--light-bg);
+}
+.filter-chip.active-available  { border-color: var(--s-available);   background: var(--s-available-bg);   color: var(--s-available); }
+.filter-chip.active-occupied   { border-color: var(--s-occupied);    background: var(--s-occupied-bg);    color: var(--s-occupied); }
+.filter-chip.active-dirty      { border-color: var(--s-dirty);       background: var(--s-dirty-bg);       color: var(--s-dirty); }
+.filter-chip.active-maintenance{ border-color: var(--s-maintenance); background: var(--s-maintenance-bg); color: var(--s-maintenance); }
+
+/* Legend */
+.status-legend {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-4);
+  flex-wrap: wrap;
+}
+.legend-item { display: flex; align-items: center; gap: 6px; font-size: 0.75rem; color: var(--light-text-2); }
+.legend-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+}
+
+/* Occupancy bar */
+.occ-bar-wrap { margin-top: var(--sp-3); }
+.occ-bar-row {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  margin-bottom: var(--sp-2);
+}
+.occ-bar-label { font-size: 0.75rem; color: var(--light-text-2); min-width: 80px; }
+.occ-bar-track {
+  flex: 1;
+  height: 6px;
+  background: var(--light-border);
+  border-radius: 3px;
+  overflow: hidden;
+}
+.occ-bar-fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 1s ease;
+}
+.occ-bar-val { font-family: var(--f-mono); font-size: 0.8125rem; min-width: 36px; text-align: right; }
+
+/* Modal */
+.modal-overlay {
+  position: fixed; inset: 0;
+  background: rgba(13, 12, 11, 0.6);
+  backdrop-filter: blur(4px);
+  z-index: 500;
+  display: flex; align-items: center; justify-content: center;
+  padding: var(--sp-4);
+  opacity: 0; pointer-events: none;
+  transition: opacity var(--tr-base);
+}
+.modal-overlay.open { opacity: 1; pointer-events: all; }
+
+.modal {
+  background: var(--light-surface);
+  border: 1px solid var(--light-border);
+  border-radius: var(--r-lg);
+  width: 100%; max-width: 540px;
+  max-height: 90dvh;
+  overflow-y: auto;
+  box-shadow: var(--sh-lg);
+  transform: translateY(12px);
+  transition: transform var(--tr-base);
+}
+.modal-overlay.open .modal { transform: none; }
+
+.modal-header {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  padding: var(--sp-5) var(--sp-6);
+  border-bottom: 1px solid var(--light-border);
+  position: sticky; top: 0;
+  background: var(--light-surface);
+  z-index: 1;
+}
+.modal-close {
+  width: 28px; height: 28px;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: var(--r-sm);
+  color: var(--light-text-2);
+  transition: var(--tr-fast);
+  cursor: pointer;
+  font-size: 1.25rem;
+  line-height: 1;
+}
+.modal-close:hover { background: var(--light-bg); color: var(--light-text); }
+.modal-body { padding: var(--sp-5) var(--sp-6); }
+
+.detail-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding-block: var(--sp-3);
+  border-bottom: 1px solid var(--light-border);
+  gap: var(--sp-4);
+}
+.detail-row:last-child { border-bottom: none; }
+.detail-label { font-size: 0.8125rem; color: var(--light-text-2); }
+.detail-value { font-size: 0.875rem; font-weight: 500; color: var(--light-text); text-align: right; }
+.detail-value-mono { font-family: var(--f-mono); }
+
+.action-row {
+  display: flex; gap: var(--sp-3); padding-top: var(--sp-4);
+  flex-wrap: wrap;
+}
+
+/* Folio items */
+.folio-item {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: var(--sp-3) var(--sp-4);
+  background: var(--light-bg);
+  border-radius: var(--r-sm);
+  margin-bottom: var(--sp-2);
+}
+.folio-item-desc { font-size: 0.8125rem; color: var(--light-text); }
+.folio-item-amt  { font-family: var(--f-mono); font-size: 0.875rem; font-weight: 500; }
+
+/* Night audit banner */
+.audit-banner {
+  background: var(--dark-surface);
+  color: var(--dark-text);
+  border: 1px solid var(--dark-border);
+  border-radius: var(--r-md);
+  padding: var(--sp-4) var(--sp-5);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-4);
+  margin-bottom: var(--sp-4);
+}
+.audit-banner-text { font-size: 0.875rem; color: var(--dark-text-2); }
+.audit-banner-title { font-size: 0.9375rem; font-weight: 700; color: var(--dark-text); margin-bottom: 2px; }
+.audit-time { font-family: var(--f-mono); font-size: 1.25rem; font-weight: 500; color: var(--accent); }
+
+@media (max-width: 768px) {
+  .two-col, .three-col { grid-template-columns: 1fr; }
+}
+@media (max-width: 960px) {
+  .three-col { grid-template-columns: 1fr 1fr; }
+}
+</style>
+</head>
+<body>
+
+<div class="app-shell">
+
+  <!-- ── Sidebar ── -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <div class="sidebar-logo-mark">
+        <svg viewBox="0 0 16 16" fill="none" stroke="none">
+          <rect x="2" y="2" width="5" height="5" rx="0.5" fill="#fff" opacity="0.7"/>
+          <rect x="9" y="2" width="5" height="5" rx="0.5" fill="#fff"/>
+          <rect x="2" y="9" width="5" height="5" rx="0.5" fill="#fff"/>
+          <rect x="9" y="9" width="5" height="5" rx="0.5" fill="#fff" opacity="0.5"/>
+        </svg>
+      </div>
+      <div>
+        <div class="sidebar-logo-text">StayOS</div>
+        <div class="sidebar-logo-sub">Property Portal</div>
+      </div>
+    </div>
+
+    <div class="sidebar-property" style="display:flex;justify-content:space-between;align-items:center;">
+      <div>
+        <div class="sidebar-property-name" id="sidebarPropName">Sunrise Boutique Hotel</div>
+        <div class="sidebar-property-type">Hotel · Cape Town</div>
+      </div>
+      <div class="sidebar-property-arrow"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 4l4 4-4 4"/></svg></div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <div class="sidebar-section-label">Operations</div>
+      <a class="sidebar-link active" data-tab="overview" onclick="switchTab('overview')">
+        <span class="sidebar-link-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="5" height="5" rx="0.5"/><rect x="9" y="2" width="5" height="5" rx="0.5"/><rect x="2" y="9" width="5" height="5" rx="0.5"/><rect x="9" y="9" width="5" height="5" rx="0.5"/></svg></span>
+        <span>Overview</span>
+      </a>
+      <a class="sidebar-link" data-tab="bookings" onclick="switchTab('bookings')">
+        <span class="sidebar-link-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="12" height="11" rx="1"/><path d="M5 2v2M11 2v2M2 7h12"/></svg></span>
+        <span>Bookings</span>
+        <span class="sidebar-badge" id="activeBookingsBadge">3</span>
+      </a>
+      <a class="sidebar-link" data-tab="rooms" onclick="switchTab('rooms')">
+        <span class="sidebar-link-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 10V6a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v4"/><path d="M1 10h14v3H1z"/></svg></span>
+        <span>Rooms</span>
+      </a>
+      <a class="sidebar-link" data-tab="housekeeping" onclick="switchTab('housekeeping')">
+        <span class="sidebar-link-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 13V5l5-3 5 3v8"/><path d="M6 13v-3h4v3"/><path d="M2 13h12"/></svg></span>
+        <span>Housekeeping</span>
+        <span class="sidebar-badge" id="hkPendingBadge">3</span>
+      </a>
+      <a class="sidebar-link" data-tab="maintenance" onclick="switchTab('maintenance')">
+        <span class="sidebar-link-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 2.5a3 3 0 0 1-3 4.5L2 11.5a1.5 1.5 0 0 0 2 2l4.5-4.5a3 3 0 0 1 4.5-3l-2 2 1 1 2-2a3 3 0 0 1-.5 4"/></svg></span>
+        <span>Maintenance</span>
+        <span class="sidebar-badge" id="mxOpenBadge">2</span>
+      </a>
+      <div class="sidebar-section-label" style="margin-top:var(--sp-2);">Reports</div>
+      <a class="sidebar-link" data-tab="reports" onclick="switchTab('reports')">
+        <span class="sidebar-link-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 13h12"/><path d="M5 13V7"/><path d="M9 13V4"/><path d="M13 13V9"/></svg></span>
+        <span>Reports</span>
+      </a>
+      <div class="sidebar-section-label" style="margin-top:var(--sp-2);">Property</div>
+      <a class="sidebar-link" data-tab="staff" onclick="switchTab('staff')">
+        <span class="sidebar-link-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="5" r="2.5"/><path d="M1 14c0-2.8 2.2-5 5-5s5 2.2 5 5"/><circle cx="12" cy="5" r="1.5"/><path d="M11 14h4c0-2.2-1.3-4-3-4.5"/></svg></span>
+        <span>Staff</span>
+      </a>
+      <a class="sidebar-link" href="./index.html">
+        <span class="sidebar-link-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 7L8 2l6 5"/><path d="M4 7v7h8V7"/><path d="M6 14v-4h4v4"/></svg></span>
+        <span>Back to Site</span>
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="sidebar-user">
+        <div class="sidebar-avatar" id="sidebarAvatarInit">AB</div>
+        <div>
+          <div class="sidebar-user-name" id="sidebarUserName">Amanda Botha</div>
+          <div class="sidebar-user-role" id="sidebarUserRole">Property Owner</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ── Main Content ── -->
+  <main class="main-content">
+    <!-- Topbar -->
+    <div class="topbar">
+      <div>
+        <div class="topbar-title" id="topbarTitle">Dashboard</div>
+        <div class="topbar-date" id="topbarDate">Sat, 20 Jun 2026</div>
+      </div>
+      <div class="topbar-actions">
+        <div class="topbar-icon-btn" title="Search">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5L14 14"/></svg>
+        </div>
+        <div class="topbar-icon-btn" title="Notifications" onclick="showToast('2 new notifications', 'info')">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2a4 4 0 0 1 4 4v3l1.5 2.5h-11L4 9V6a4 4 0 0 1 4-4z"/><path d="M6.5 13.5a1.5 1.5 0 0 0 3 0"/></svg>
+          <span class="topbar-notif-dot"></span>
+        </div>
+        <button class="btn btn-accent btn-sm" onclick="openBookingModal()">+ New Booking</button>
+      </div>
+    </div>
+
+    <!-- Tab Content -->
+    <div class="page-content" id="pageContent">
+      <!-- Rendered by JS -->
+    </div>
+  </main>
+</div>
+
+<!-- Booking Detail Modal -->
+<div class="modal-overlay" id="bookingModal">
+  <div class="modal" id="modalContent">
+    <!-- Rendered by JS -->
+  </div>
+</div>
+
+<!-- Toast -->
+<div id="toast" style="position:fixed;bottom:calc(var(--sp-6) + env(safe-area-inset-bottom));right:var(--sp-6);z-index:900;transform:translateY(80px);opacity:0;transition:all 0.3s ease;pointer-events:none;">
+  <div style="background:var(--light-text);color:var(--light-bg);padding:12px 20px;border-radius:var(--r-md);font-size:0.875rem;font-weight:500;box-shadow:var(--sh-lg);display:flex;align-items:center;gap:var(--sp-3);max-width:320px;" id="toastInner"></div>
+</div>
+
+<script src="./js/data.js"></script>
+<script src="./js/property.js"></script>
+</body>
+</html>

@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#F0EDE6">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<title>My Account — StayOS</title>
+<link rel="stylesheet" href="./css/base.css">
+<style>
+/* ── Customer Portal Layout ── */
+body { background: var(--light-bg); }
+
+.customer-shell {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── Customer Nav ── */
+.customer-nav {
+  background: var(--light-surface);
+  border-bottom: 1px solid var(--light-border);
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-inline: clamp(var(--sp-4), 4vw, var(--sp-8));
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.customer-nav-logo {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  text-decoration: none;
+}
+
+.customer-nav-logo-mark {
+  width: 22px; height: 22px;
+  background: var(--accent);
+  border-radius: var(--r-sm);
+  display: flex; align-items: center; justify-content: center;
+}
+
+.customer-nav-logo-text {
+  font-weight: 800;
+  font-size: 0.875rem;
+  letter-spacing: -0.02em;
+  color: var(--light-text);
+}
+
+.customer-nav-tabs {
+  display: flex;
+  gap: 0;
+  height: 100%;
+}
+
+.customer-nav-tab {
+  display: flex;
+  align-items: center;
+  padding-inline: var(--sp-4);
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--light-text-2);
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  transition: var(--tr-fast);
+  height: 100%;
+  gap: var(--sp-2);
+  white-space: nowrap;
+}
+.customer-nav-tab:hover { color: var(--light-text); }
+.customer-nav-tab.active {
+  color: var(--light-text);
+  border-bottom-color: var(--accent);
+  font-weight: 600;
+}
+
+.customer-nav-user {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  cursor: pointer;
+}
+
+.customer-avatar-lg {
+  width: 34px; height: 34px;
+  border-radius: 50%;
+  background: var(--accent-subtle);
+  border: 1.5px solid var(--accent-mid);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--accent);
+}
+
+.customer-name-display {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--light-text);
+}
+
+/* ── Hero Profile Strip ── */
+.profile-strip {
+  background: var(--light-surface);
+  border-bottom: 1px solid var(--light-border);
+  padding: var(--sp-5) clamp(var(--sp-4), 4vw, var(--sp-8));
+}
+
+.profile-strip-inner {
+  max-width: 1080px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  gap: var(--sp-5);
+  flex-wrap: wrap;
+}
+
+.profile-avatar-xl {
+  width: 56px; height: 56px;
+  border-radius: 50%;
+  background: var(--accent-subtle);
+  border: 2px solid var(--accent-mid);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--accent);
+  flex-shrink: 0;
+}
+
+.profile-info { flex: 1; min-width: 0; }
+.profile-display-name {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--light-text);
+  letter-spacing: -0.01em;
+}
+.profile-email { font-size: 0.875rem; color: var(--light-text-2); }
+
+.profile-strip-meta {
+  display: flex;
+  gap: var(--sp-6);
+  flex-wrap: wrap;
+}
+
+.profile-meta-item { text-align: right; }
+.profile-meta-val {
+  font-family: var(--f-mono);
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--light-text);
+  letter-spacing: -0.02em;
+}
+.profile-meta-label {
+  font-size: 0.6875rem;
+  color: var(--light-text-2);
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+}
+
+/* ── Main Content ── */
+.customer-main {
+  flex: 1;
+  max-width: 1080px;
+  margin: 0 auto;
+  width: 100%;
+  padding: var(--sp-6) clamp(var(--sp-4), 4vw, var(--sp-8));
+  padding-bottom: calc(var(--sp-10) + env(safe-area-inset-bottom));
+}
+
+/* ── Loyalty Tier Card ── */
+.loyalty-hero {
+  background: var(--dark-bg);
+  color: var(--dark-text);
+  border-radius: var(--r-md);
+  padding: var(--sp-6);
+  margin-bottom: var(--sp-6);
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: var(--sp-6);
+  align-items: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.loyalty-hero::before {
+  content: '';
+  position: absolute;
+  right: -40px; top: -40px;
+  width: 200px; height: 200px;
+  border-radius: 50%;
+  background: rgba(200, 75, 40, 0.06);
+}
+
+.loyalty-tier-label {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--dark-text-3);
+  margin-bottom: var(--sp-2);
+}
+
+.loyalty-tier-name {
+  font-family: var(--f-display);
+  font-size: 2.25rem;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  color: var(--dark-text);
+  margin-bottom: var(--sp-4);
+}
+
+.loyalty-tier-name span { color: var(--accent); }
+
+.loyalty-progress-label {
+  font-size: 0.8125rem;
+  color: var(--dark-text-2);
+  margin-bottom: var(--sp-2);
+}
+
+.loyalty-progress-bar {
+  height: 4px;
+  background: var(--dark-border);
+  border-radius: 2px;
+  margin-bottom: var(--sp-2);
+  overflow: hidden;
+}
+.loyalty-progress-fill {
+  height: 100%;
+  border-radius: 2px;
+  background: var(--accent);
+}
+
+.loyalty-progress-note { font-size: 0.75rem; color: var(--dark-text-3); }
+
+.loyalty-balance-display { text-align: right; position: relative; z-index: 1; }
+.loyalty-points-number {
+  font-family: var(--f-mono);
+  font-size: 2.5rem;
+  font-weight: 600;
+  color: var(--dark-text);
+  letter-spacing: -0.04em;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+.loyalty-points-label { font-size: 0.75rem; color: var(--dark-text-2); text-align: right; }
+.loyalty-tier-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  background: var(--accent);
+  color: #fff;
+  border-radius: var(--r-sm);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  margin-bottom: var(--sp-3);
+}
+
+/* ── Booking Card ── */
+.booking-card {
+  background: var(--light-surface);
+  border: 1px solid var(--light-border);
+  border-radius: var(--r-md);
+  overflow: hidden;
+  transition: var(--tr-base);
+  cursor: pointer;
+}
+.booking-card:hover { box-shadow: var(--sh-md); }
+
+.booking-card-header {
+  background: var(--dark-bg);
+  color: var(--dark-text);
+  padding: var(--sp-4) var(--sp-5);
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--sp-3);
+}
+
+.booking-card-ref {
+  font-family: var(--f-mono);
+  font-size: 0.75rem;
+  color: var(--dark-text-3);
+  margin-bottom: 3px;
+}
+.booking-card-name {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--dark-text);
+}
+
+.booking-card-body {
+  padding: var(--sp-5);
+}
+
+.booking-card-dates {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-4);
+  margin-bottom: var(--sp-4);
+}
+
+.booking-date-col { text-align: center; }
+.booking-date-label { font-size: 0.6875rem; color: var(--light-text-2); text-transform: uppercase; letter-spacing: 0.07em; }
+.booking-date-val   { font-family: var(--f-mono); font-size: 1.0625rem; font-weight: 600; color: var(--light-text); }
+.booking-date-sub   { font-size: 0.75rem; color: var(--light-text-2); }
+
+.booking-date-arrow {
+  color: var(--light-text-3);
+  flex: 1;
+  text-align: center;
+  font-size: 1.25rem;
+}
+
+.booking-card-meta {
+  display: flex;
+  gap: var(--sp-5);
+  padding-top: var(--sp-4);
+  border-top: 1px solid var(--light-border);
+  flex-wrap: wrap;
+}
+
+.booking-meta-item { }
+.booking-meta-label { font-size: 0.6875rem; color: var(--light-text-3); text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 2px; }
+.booking-meta-val   { font-size: 0.875rem; font-weight: 600; color: var(--light-text); }
+.booking-meta-mono  { font-family: var(--f-mono); }
+
+.booking-card-footer {
+  padding: var(--sp-3) var(--sp-5);
+  border-top: 1px solid var(--light-border);
+  background: var(--light-bg);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* ── Invoice Item ── */
+.invoice-row {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-4);
+  padding: var(--sp-4) var(--sp-5);
+  border-bottom: 1px solid var(--light-border);
+  cursor: pointer;
+  transition: background var(--tr-fast);
+}
+.invoice-row:hover { background: var(--light-bg); }
+.invoice-row:last-child { border-bottom: none; }
+
+.invoice-icon {
+  width: 36px; height: 36px;
+  border-radius: var(--r-sm);
+  background: var(--light-bg);
+  border: 1px solid var(--light-border);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--light-text-2);
+  flex-shrink: 0;
+}
+.invoice-icon svg { width: 16px; height: 16px; }
+
+/* ── Points Transaction ── */
+.points-tx {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-4);
+  padding: var(--sp-3) var(--sp-5);
+  border-bottom: 1px solid var(--light-border);
+}
+.points-tx:last-child { border-bottom: none; }
+
+.points-tx-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.points-earn { background: var(--s-available); }
+.points-burn { background: var(--s-maintenance); }
+
+.points-tx-amount {
+  font-family: var(--f-mono);
+  font-size: 0.9375rem;
+  font-weight: 600;
+  margin-left: auto;
+  min-width: 64px;
+  text-align: right;
+}
+
+.points-earn-txt { color: var(--s-available); }
+.points-burn-txt { color: var(--s-maintenance); }
+
+/* ── Profile form ── */
+.form-section { margin-bottom: var(--sp-6); }
+.form-section-title {
+  font-size: 0.9375rem;
+  font-weight: 700;
+  color: var(--light-text);
+  letter-spacing: -0.01em;
+  margin-bottom: var(--sp-4);
+  padding-bottom: var(--sp-3);
+  border-bottom: 1px solid var(--light-border);
+}
+
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--sp-4); }
+.form-full { grid-column: 1 / -1; }
+
+.form-label {
+  display: block;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--light-text);
+  margin-bottom: var(--sp-2);
+}
+
+.form-input {
+  width: 100%;
+  padding: 10px var(--sp-3);
+  background: var(--light-surface);
+  border: 1.5px solid var(--light-border);
+  border-radius: var(--r-sm);
+  font-size: 0.9375rem;
+  color: var(--light-text);
+  transition: border-color var(--tr-fast);
+  font-family: var(--f-body);
+  min-height: 44px;
+}
+.form-input:focus {
+  outline: none;
+  border-color: var(--light-text);
+}
+
+.toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--sp-3) 0;
+  border-bottom: 1px solid var(--light-border);
+}
+.toggle-row:last-child { border-bottom: none; }
+
+.toggle-info-title { font-size: 0.9375rem; font-weight: 500; color: var(--light-text); }
+.toggle-info-desc  { font-size: 0.8125rem; color: var(--light-text-2); }
+
+.toggle {
+  width: 40px; height: 22px;
+  background: var(--light-border);
+  border-radius: 11px;
+  cursor: pointer;
+  position: relative;
+  flex-shrink: 0;
+  transition: background var(--tr-base);
+}
+.toggle.on { background: var(--s-available); }
+.toggle::after {
+  content: '';
+  position: absolute;
+  top: 2px; left: 2px;
+  width: 18px; height: 18px;
+  border-radius: 50%;
+  background: #fff;
+  transition: transform var(--tr-base);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+}
+.toggle.on::after { transform: translateX(18px); }
+
+/* ── Student banner ── */
+.student-banner {
+  background: var(--s-inspection-bg);
+  border: 1px solid var(--s-inspection);
+  border-radius: var(--r-md);
+  padding: var(--sp-4) var(--sp-5);
+  display: flex;
+  align-items: flex-start;
+  gap: var(--sp-3);
+  margin-bottom: var(--sp-4);
+}
+.student-banner-icon { color: var(--s-inspection); flex-shrink: 0; margin-top: 1px; }
+.student-banner-title { font-weight: 700; font-size: 0.9375rem; color: var(--light-text); margin-bottom: 2px; }
+.student-banner-text  { font-size: 0.875rem; color: var(--light-text-2); }
+
+/* Switch user banner */
+.demo-banner {
+  background: var(--dark-surface);
+  border-bottom: 1px solid var(--dark-border);
+  padding: var(--sp-2) clamp(var(--sp-4), 4vw, var(--sp-8));
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--sp-3);
+}
+.demo-banner-text { font-size: 0.8125rem; color: var(--dark-text-2); }
+.demo-switch-btns { display: flex; gap: var(--sp-2); }
+
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: var(--sp-4); }
+
+@media (max-width: 768px) {
+  .customer-nav-tabs .customer-nav-tab span { display: none; }
+  .loyalty-hero { grid-template-columns: 1fr; }
+  .loyalty-balance-display { text-align: left; }
+  .two-col { grid-template-columns: 1fr; }
+  .form-grid { grid-template-columns: 1fr; }
+  .profile-strip-meta { gap: var(--sp-4); }
+  .profile-meta-item { text-align: left; }
+}
+
+@media (max-width: 480px) {
+  .customer-nav-tabs { gap: 0; overflow-x: auto; scrollbar-width: none; }
+  .customer-nav-tabs::-webkit-scrollbar { display: none; }
+  .customer-nav-tab { padding-inline: var(--sp-3); font-size: 0.8125rem; }
+}
+</style>
+</head>
+<body>
+
+<div class="customer-shell">
+
+  <!-- Demo switcher banner -->
+  <div class="demo-banner">
+    <span class="demo-banner-text">StayOS Customer Portal · Viewing as Guest</span>
+    <div class="demo-switch-btns">
+      <button class="btn btn-sm btn-dark-outline" onclick="switchCustomerType('guest')">Guest View</button>
+      <button class="btn btn-sm btn-dark-outline" onclick="switchCustomerType('student')">Student View</button>
+    </div>
+  </div>
+
+  <!-- Customer Nav -->
+  <nav class="customer-nav">
+    <a href="./index.html" class="customer-nav-logo">
+      <div class="customer-nav-logo-mark">
+        <svg viewBox="0 0 16 16" fill="none">
+          <rect x="2" y="2" width="5" height="5" rx="0.5" fill="#fff" opacity="0.7"/>
+          <rect x="9" y="2" width="5" height="5" rx="0.5" fill="#fff"/>
+          <rect x="2" y="9" width="5" height="5" rx="0.5" fill="#fff"/>
+          <rect x="9" y="9" width="5" height="5" rx="0.5" fill="#fff" opacity="0.5"/>
+        </svg>
+      </div>
+      <span class="customer-nav-logo-text">StayOS</span>
+    </a>
+
+    <div class="customer-nav-tabs" id="navTabs">
+      <div class="customer-nav-tab active" data-tab="stays" onclick="switchTab('stays')">
+        <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 10V6a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v4"/><path d="M1 10h14v3H1z"/></svg>
+        <span>My Stays</span>
+      </div>
+      <div class="customer-nav-tab" data-tab="loyalty" onclick="switchTab('loyalty')">
+        <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2l1.5 3 3.5.5-2.5 2.5.5 3.5L8 10l-3 1.5.5-3.5L3 5.5 6.5 5z"/></svg>
+        <span>Loyalty</span>
+      </div>
+      <div class="customer-nav-tab" id="tabStudent" data-tab="student" onclick="switchTab('student')" style="display:none;">
+        <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 10L8 7l6 3-6 3-6-3z"/><path d="M5 11.5v3"/><path d="M14 10v4"/></svg>
+        <span>Student</span>
+      </div>
+      <div class="customer-nav-tab" data-tab="profile" onclick="switchTab('profile')">
+        <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="5" r="3"/><path d="M2 14c0-3.3 2.7-6 6-6s6 2.7 6 6"/></svg>
+        <span>Profile</span>
+      </div>
+    </div>
+
+    <div class="customer-nav-user">
+      <div class="customer-avatar-lg" id="navAvatar">TN</div>
+      <div class="customer-name-display" id="navName">Thabo Nkosi</div>
+    </div>
+  </nav>
+
+  <!-- Profile Strip -->
+  <div class="profile-strip" id="profileStrip">
+    <div class="profile-strip-inner">
+      <div class="profile-avatar-xl" id="profileAvatarXL">TN</div>
+      <div class="profile-info">
+        <div class="profile-display-name" id="profileDisplayName">Thabo Nkosi</div>
+        <div class="profile-email" id="profileEmail">thabo.nkosi@email.co.za</div>
+      </div>
+      <div class="profile-strip-meta" id="profileMeta">
+        <!-- Rendered by JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Main -->
+  <div class="customer-main" id="customerMain">
+    <!-- Rendered by JS -->
+  </div>
+</div>
+
+<!-- Toast -->
+<div id="custToast" style="position:fixed;bottom:calc(var(--sp-6) + env(safe-area-inset-bottom));right:var(--sp-6);z-index:900;transform:translateY(80px);opacity:0;transition:all 0.3s ease;pointer-events:none;">
+  <div style="background:var(--light-text);color:var(--light-bg);padding:12px 20px;border-radius:var(--r-md);font-size:0.875rem;font-weight:500;box-shadow:var(--sh-lg);display:flex;align-items:center;gap:var(--sp-3);max-width:320px;" id="custToastInner"></div>
+</div>
+
+<script src="./js/data.js"></script>
+<script src="./js/customer.js"></script>
+</body>
+</html>
