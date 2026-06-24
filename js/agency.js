@@ -3,7 +3,7 @@
    ============================================================ */
 
 let D = null;
-const { fmt, fmtZAR, fmtDate, fmtDateShort, statusLabel, roleLabel, initials, makeBadge, loadData } = window.StayOS;
+
 
 async function init() {
   D = await loadData();

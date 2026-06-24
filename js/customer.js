@@ -6,7 +6,7 @@ let D = null;
 let customerType = 'guest'; // 'guest' | 'student'
 let currentTab = 'stays';
 
-const { fmt, fmtZAR, fmtDate, fmtDateShort, statusLabel, initials, makeBadge, loadData } = window.StayOS;
+
 
 async function init() {
   D = await loadData();

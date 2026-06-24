@@ -6,7 +6,7 @@ let D = null; // seed data
 let currentTab = 'overview';
 let selectedBooking = null;
 
-const { fmt, fmtZAR, fmtDate, fmtDateShort, statusLabel, roleLabel, initials, makeBadge, makeIcon, loadData, todayDisplay } = window.StayOS;
+
 
 async function init() {
   D = await loadData();
